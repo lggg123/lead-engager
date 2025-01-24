@@ -1,0 +1,48 @@
+{
+    "rules": {
+      "codeGeneration": {
+        "preferLanguage": "typescript",
+        "testing": {
+          "framework": "jest",
+          "generateTestsFor": ["src/lib/**/*.ts"],
+          "testFileLocation": "__tests__",
+          "testFileSuffix": ".test.ts",
+          "preferMocking": "automock",
+          "testPatterns": {
+            "describeBlocks": true,
+            "coverageThresholds": {
+              "lines": 80,
+              "functions": 80,
+              "branches": 70
+            }
+          }
+        },
+        "documentation": {
+          "includeExamples": true,
+          "preferJSDoc": true
+        }
+      },
+      "autoFix": {
+        "enableImports": true,
+        "sortImports": true,
+        "preferNamedExports": true,
+        "autoMock": true
+      },
+      "privacy": {
+        "ignoreEnvVariables": ["API_KEY", "GOOGLE_CREDENTIALS"]
+      },
+      "formatting": {
+        "prettier": true,
+        "indentSize": 2,
+        "semicolons": false
+      },
+      "linting": {
+        "enableESLint": true,
+        "preferStrictTypeChecking": true,
+        "testLinting": {
+          "preferStrictEquality": "error",
+          "noDisabledTests": "error"
+        }
+      }
+    }
+  }
