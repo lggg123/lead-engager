@@ -14,7 +14,7 @@ A Next.js application for automating personalized email outreach to business own
 
 1. Install dependencies:
 ```bash
-npm install
+pnpm install
 # or
 yarn install
 ```
@@ -38,7 +38,7 @@ GOOGLE_REFRESH_TOKEN=your_refresh_token
 
 5. Run the development server:
 ```bash
-npm run dev
+pnpm dev
 # or
 yarn dev
 ```
@@ -55,7 +55,7 @@ yarn dev
 
 Run the test suite:
 ```bash
-npm test
+pnpm test
 # or
 yarn test
 ```
