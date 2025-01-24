@@ -1,7 +1,6 @@
-import { EmailTemplate } from '@/lib/types'
+import { EmailTemplate } from '../types'
 import nodemailer from 'nodemailer'
 import { google } from 'googleapis'
-import type { TransportOptions } from 'nodemailer'
 import type SMTPTransport from 'nodemailer/lib/smtp-transport'
 const OAuth2 = google.auth.OAuth2
 
@@ -12,6 +11,7 @@ export class EmailSender {
   private transporter!: nodemailer.Transporter
   private fromEmail: string
   private static isTestEnvironment = false
+  private initialized: boolean = false
 
   static setTestMode(enabled: boolean) {
     EmailSender.isTestEnvironment = enabled
@@ -19,7 +19,14 @@ export class EmailSender {
 
   constructor(fromEmail: string = 'george@revuescentral.com') {
     this.fromEmail = fromEmail
-    
+  }
+
+  /**
+   * Initializes the email transporter with OAuth2 credentials
+   */
+  private async initialize() {
+    if (this.initialized) return
+
     if (EmailSender.isTestEnvironment) {
       this.transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -30,21 +37,34 @@ export class EmailSender {
           pass: 'test-password'
         }
       } as SMTPTransport.Options)
+      this.initialized = true
       return
     }
 
-    const oauth2Client = new OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      'https://developers.google.com/oauthplayground'
-    )
+    // Verify required environment variables
+    const requiredEnvVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN']
+    for (const envVar of requiredEnvVars) {
+      if (!process.env[envVar]) {
+        throw new Error(`Missing required environment variable: ${envVar}`)
+      }
+    }
 
-    oauth2Client.setCredentials({
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-    })
+    try {
+      const oauth2Client = new OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        'https://developers.google.com/oauthplayground'
+      )
 
-    const createTransporter = async () => {
+      oauth2Client.setCredentials({
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+      })
+
       const accessToken = await oauth2Client.getAccessToken()
+      if (!accessToken.token) {
+        throw new Error('Failed to get access token')
+      }
+
       this.transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -53,12 +73,18 @@ export class EmailSender {
           clientId: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
           refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-          accessToken: accessToken.token || '',
+          accessToken: accessToken.token,
         }
       } as SMTPTransport.Options)
-    }
 
-    createTransporter()
+      // Verify the connection
+      await this.transporter.verify()
+      console.log('✅ SMTP connection verified successfully')
+      this.initialized = true
+    } catch (error) {
+      console.error('❌ Error initializing email transporter:', error)
+      throw error
+    }
   }
 
   /**
@@ -67,6 +93,10 @@ export class EmailSender {
    * @returns The message ID of the sent email
    */
   async sendEmail(template: EmailTemplate): Promise<string> {
+    if (!this.initialized) {
+      await this.initialize()
+    }
+
     try {
       const info = await this.transporter.sendMail({
         from: this.fromEmail,

@@ -35,19 +35,19 @@ export function generateLocationEmail(
   `.trim()
 
   const emailContent = `
-    Hi ${contact.firstName},
+    Hi ${contact.firstName},\n\n
 
-    I noticed the businesses at locations ${locationsList} respectively.
+    I noticed the businesses at locations ${locationsList} respectively.\n\n
 
-    Your ${lowestRating} star rating can be improved upon pretty easily. 77% of consumers are willing to leave a review if asked.
+    Your ${lowestRating} star rating can be improved upon pretty easily. 77% of consumers are willing to leave a review if asked.\n\n
 
-    Revues AI is a simple and straightforward technology that makes it easier for customers to leave high quality, SEO rich reviews.
+    Revues AI is a simple and straightforward technology that makes it easier for customers to leave high quality, SEO rich reviews.\n\n
 
-    We'd give you a unique QR code to put into your customer communications (post service). All customers have to do is scan, tap, and click submit and we'll start generating strong reviews and ratings for your business.
+    We'd give you a unique QR code to put into your customer communications (post service). All customers have to do is scan, tap, and click submit and we'll start generating strong reviews and ratings for your business.\n\n
 
-    It's a minimal effort solution for a high impact return.
+    It's a minimal effort solution for a high impact return.\n\n
 
-    Let me know if you're open to trying it for a few weeks.
+    Let me know if you're open to trying it for a few weeks.\n\n
 
     ${signature}
   `.trim().replace(/\n\s+/g, '\n')
@@ -55,7 +55,7 @@ export function generateLocationEmail(
   return {
     to: contact.email,
     subject: `Improve ${locations[0].name} Customer Reviews`,
-    html: emailContent.replace(/\n/g, '<br>'),
+    html: emailContent.replace(/\n/g, '<br><br>'),
     attachments: [
       {
         filename: 'revues-logo.png',

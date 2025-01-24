@@ -38,3 +38,7 @@ leads.csv
 next-env.d.ts
 
 .env
+
+.cursorrules
+
+location-cache.json
